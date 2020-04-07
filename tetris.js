@@ -22,12 +22,17 @@ function drawMatrix(matrix, offset) {
   matrix.forEach((row, y) => {
     row.forEach((value, x) => {
       if (value !== 0) {
-        context.fillStyle = "red";
+        context.fillStyle = "purple";
         // Allows to move around the x and y axis
         context.fillRect(x + offset.x, y + offset.y, 1, 1);
       }
     });
   });
+}
+
+function playerDrop() {
+  player.pos.y++;
+  dropCounter = 0;
 }
 
 // drop animation
@@ -41,8 +46,7 @@ function update(time = 0) {
 
   dropCounter += deltaTime;
   if (dropCounter > dropInterval) {
-    player.pos.y++;
-    dropCounter = 0;
+    playerDrop();
   }
   draw();
   requestAnimationFrame(update);
@@ -53,5 +57,16 @@ const player = {
   pos: { x: 1, y: 5 },
   matrix: matrix,
 };
+
+// Event to move positioning
+document.addEventListener("keydown", (event) => {
+  if (event.keyCode === 37) {
+    player.pos.x--;
+  } else if (event.keyCode === 39) {
+    player.pos.x++;
+  } else if (event.keyCode === 40) {
+    playerDrop();
+  }
+});
 
 update();
