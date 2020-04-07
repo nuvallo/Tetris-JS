@@ -4,15 +4,18 @@ const context = canvas.getContext("2d");
 // scales each tetris piece
 context.scale(20, 20);
 
-// Canvas
-context.fillStyle = "#000";
-context.fillRect(0, 0, canvas.clientWidth, canvas.height);
-
 const matrix = [
   [0, 0, 0],
   [1, 1, 1],
   [0, 1, 0],
 ];
+
+function draw() {
+  // Canvas
+  context.fillStyle = "#000";
+  context.fillRect(0, 0, canvas.clientWidth, canvas.height);
+  drawMatrix(player.matrix, player.pos);
+}
 
 // Each tetris piece
 function drawMatrix(matrix, offset) {
@@ -27,11 +30,15 @@ function drawMatrix(matrix, offset) {
   });
 }
 
+function update() {
+  draw();
+  requestAnimationFrame(update);
+}
+
 // player containing position and metrix
 const player = {
   pos: { x: 1, y: 5 },
   matrix: matrix,
 };
 
-// Takes in the x and y values
-drawMatrix(player.matrix, player.pos);
+update();
