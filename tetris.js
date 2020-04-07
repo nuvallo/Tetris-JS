@@ -21,41 +21,53 @@ function createPiece(type) {
     ];
   } else if (type === "O") {
     return [
-      [1, 1],
-      [1, 1],
+      [2, 2],
+      [2, 2],
     ];
   } else if (type === "L") {
     return [
-      [0, 1, 0],
-      [0, 1, 0],
-      [0, 1, 1],
+      [0, 3, 0],
+      [0, 3, 0],
+      [0, 3, 3],
     ];
   } else if (type === "J") {
     return [
-      [0, 1, 0],
-      [0, 1, 0],
-      [1, 1, 0],
+      [0, 4, 0],
+      [0, 4, 0],
+      [4, 4, 0],
     ];
   } else if (type === "I") {
     return [
-      [0, 1, 0, 0],
-      [0, 1, 0, 0],
-      [0, 1, 0, 0],
+      [0, 5, 0, 0],
+      [0, 5, 0, 0],
+      [0, 5, 0, 0],
     ];
   } else if (type === "S") {
     return [
-      [0, 1, 1],
-      [1, 1, 0],
+      [0, 6, 6],
+      [6, 6, 0],
       [0, 0, 0],
     ];
   } else if (type === "Z") {
     return [
-      [1, 1, 0],
-      [0, 1, 1],
+      [7, 7, 0],
+      [0, 7, 7],
       [0, 0, 0],
     ];
   }
 }
+
+// Piece colors
+const colors = [
+  null,
+  "purple",
+  "yellow",
+  "orange",
+  "blue",
+  "aqua",
+  "green",
+  "red",
+];
 
 function draw() {
   // Canvas
@@ -72,12 +84,30 @@ function drawMatrix(matrix, offset) {
   matrix.forEach((row, y) => {
     row.forEach((value, x) => {
       if (value !== 0) {
-        context.fillStyle = "purple";
+        context.fillStyle = colors[value];
         // Allows to move around the x and y axis
         context.fillRect(x + offset.x, y + offset.y, 1, 1);
       }
     });
   });
+}
+
+function arenaSweep() {
+  let rowCount = 1;
+  outer: for (let y = arena.length - 1; y > 0; --y) {
+    for (let x = 0; x < arena[y].length; ++x) {
+      if (arena[y][x] === 0) {
+        continue outer;
+      }
+    }
+
+    const row = arena.splice(y, 1)[0].fill(0);
+    arena.unshift(row);
+    ++y;
+
+    player.score += rowCount * 10;
+    rowCount *= 2;
+  }
 }
 
 // Allows stacking of matrix pieces
@@ -109,6 +139,8 @@ function playerDrop() {
     player.pos.y--;
     merge(arena, player);
     playerReset();
+    arenaSweep();
+    updateScore();
   }
   dropCounter = 0;
 }
@@ -121,6 +153,7 @@ function playerMove(dir) {
   }
 }
 
+// Generates new pieces
 function playerReset() {
   const pieces = "ILJOTSZ";
   player.matrix = createPiece(pieces[(pieces.length * Math.random()) | 0]);
@@ -129,6 +162,7 @@ function playerReset() {
     ((arena[0].length / 2) | 0) - ((player.matrix[0].length / 2) | 0);
   if (collide(arena, player)) {
     arena.forEach((row) => row.fill(0));
+    player.score = 0;
   }
 }
 
@@ -179,13 +213,18 @@ function update(time = 0) {
   requestAnimationFrame(update);
 }
 
+function updateScore() {
+  document.getElementById("score").innerText = `Score: ${player.score}`;
+}
+
 // where pieces collect
 const arena = createMatrix(12, 20);
 
 // player containing position and metrix
 const player = {
-  pos: { x: 1, y: 5 },
-  matrix: createPiece("S"),
+  pos: { x: 0, y: 0 },
+  matrix: null,
+  score: 0,
 };
 
 // Event to move positioning
@@ -202,4 +241,7 @@ document.addEventListener("keydown", (event) => {
     playerRotate(1);
   }
 });
+
+playerReset();
+updateScore();
 update();
